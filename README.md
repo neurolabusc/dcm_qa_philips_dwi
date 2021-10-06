@@ -18,29 +18,33 @@ Data provided by [Paul S. Morgan at the University of Nottigham](https://www.not
 
 ## Ordering of Volumes
  
-The DICOM standard does not require that the image instance number (0020,0013) is sequential or even unique. However, with the exception of Philips manufacturers generate instance numbers in the temporal order of acquisition. Unfortunately, Philips often generates scrambled instance numbers. Further, as demonstrated in this dataset, Philips can use the same FrameAcquisitionDateTime ([0018,9074](http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,9074)) for all images in a series. This makes it impossible to infer the true acquisition order of volumes for Philips DWI images. For enhanced DICOMs, dcm2niix will order volumes as described by the DimensionIndexValues ([0020,9157](http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0020,9157))). However, this tag does not exist for classic DICOM. Therefore, for Philips DICOM saved as classic DICOMs, dcm2niix will resort to using the private tags BValueNumber (2005,1412) and GradientOrientationNumber (2005,1413) to identify slices from the same volume. As this dataset illustrates, it is possible for volumes in a series to repeat both of these tags, but taken together they provide a unique combination. For ordering Philips classic DWI volumes, dcm2niix will sort by 2005,1412 and then by 2005,1413. Therefore, volumes with identical b-values will be stored contiguously. Be aware that this volume order may not match temporal order of acquisition, or the order specified if the data is saved as enhanced format. As a concrete example, here is the volume order for the example dataset (where 2001,1003 is the specified b-value in s/mm2):
+The DICOM standard does not require that the image instance number (0020,0013) is sequential or even unique. However, with the exception of Philips manufacturers generate instance numbers in the temporal order of acquisition. Unfortunately, Philips often generates scrambled instance numbers. 
 
-| 2005,1412 | 2005,1413 | 2001,1003 |
-|-----------|-----------|-----------|
-| 1 | 1 | 0 |
-| 2 | 2 | 1000 |
-| 2 | 3 | 1000 |
-| 2 | 4 | 1000 |
-| 2 | 5 | 1000 |
-| 2 | 6 | 1000 |
-| 2 | 7 | 1000 |
-| 2 | 8 | 1000 |
-| 2 | 9 | 1000 |
-| 2 | 10 | 1000 |
-| 2 | 11 | 1000 |
-| 2 | 12 | 1000 |
-| 2 | 13 | 1000 |
-| 3 | 1 | 0.001 |
-| 4 | 1 | 0.002 |
-| 5 | 1 | 0.003 |
-| 6 | 1 | 0.004 |
+For Philips software 5.6 and later one can use the private DiffusionOrder tag (2005,1596) to determine which 3D volume 2D slice belongs to. This tag reveals the temporal order of acquisition. When available, dcm2niix will use this tag to sort diffusion images.
 
-Since it is not specified by Philips DWI, no tool can derive temporal order. This reflects a limitation of the Philips data, not of dcm2niix. Users should be cautious is they use tools that infer temporal order (e.g. for modeling head motion or T1 effects). dcm2niix will ensure that 2D slices are sorted with their respective 3D volume, and that the volume order is consistent. However, the same data may be converted to a different order if stored as classic versus enhanced DICOM.
+The situation is trickier for older Philips diffusion data, where temporal order can not be precisely inferred. As demonstrated in this dataset, Philips can use the same FrameAcquisitionDateTime ([0018,9074](http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,9074)) for all images in a series. This makes it impossible to infer the true acquisition order of volumes for Philips DWI images. For enhanced DICOMs, dcm2niix will order volumes as described by the DimensionIndexValues ([0020,9157](http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0020,9157))). However, this tag does not exist for classic DICOM. Therefore, for Philips DICOM saved as classic DICOMs, dcm2niix will resort to using the private tags BValueNumber (2005,1412) and GradientOrientationNumber (2005,1413) to identify slices from the same volume. As this dataset illustrates, it is possible for volumes in a series to repeat both of these tags, but taken together they provide a unique combination. For ordering Philips classic DWI volumes, dcm2niix will sort by 2005,1412 and then by 2005,1413. Therefore, volumes with identical b-values will be stored contiguously. Be aware that this volume order may not match temporal order of acquisition, or the order specified if the data is saved as enhanced format. As a concrete example, here is the volume order for the example dataset (where 2001,1003 is the specified b-value in s/mm2). Therefore, when converting older Philips images, users should be cautious if they use tools that infer temporal order (e.g. for modeling head motion or T1 effects).
+
+Here are the relevant tags for the provided dataset.
+
+| 2005,1412 | 2005,1413 | 2001,1003 | 2005,1596 |
+|-----------|-----------|-----------|-----------|
+| 1 | 1 | 0 | 1 |
+| 2 | 2 | 1000 | 2 |
+| 2 | 3 | 1000 | 3 |
+| 2 | 4 | 1000 | 4 |
+| 2 | 5 | 1000 | 6 |
+| 2 | 6 | 1000 | 7 |
+| 2 | 7 | 1000 | 8 |
+| 2 | 8 | 1000 | 10 |
+| 2 | 9 | 1000 | 11 |
+| 2 | 10 | 1000 | 12 |
+| 2 | 11 | 1000 | 14 |
+| 2 | 12 | 1000 | 15 |
+| 2 | 13 | 1000 | 16 |
+| 3 | 1 | 0.001 | 5 |
+| 4 | 1 | 0.002 | 9 |
+| 5 | 1 | 0.003 | 13 |
+| 6 | 1 | 0.004 | 17 |
 
 ## License
 
